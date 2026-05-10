@@ -435,23 +435,40 @@ scheduler(void)
     intr_off();
 
     int found = 0;
+    struct proc *best=0;
     for(p = proc; p < &proc[NPROC]; p++) {
-      acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
+  acquire(&p->lock);
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        found = 1;
-      }
+  if(p->state == RUNNABLE) {
+
+    if(best == 0 || p->priority > best->priority) {
+
+      if(best != 0)
+        release(&best->lock);
+
+      best = p;
+
+    } else {
       release(&p->lock);
     }
+
+  } else {
+    release(&p->lock);
+  }
+}
+
+if(best != 0) {
+  p = best;
+  found = 1;
+
+  p->state = RUNNING;
+  c->proc = p;
+
+  swtch(&c->context, &p->context);
+
+  c->proc = 0;
+  release(&p->lock);
+}
     if(found == 0) {
       // nothing to run; stop running on this core until an interrupt.
       asm volatile("wfi");

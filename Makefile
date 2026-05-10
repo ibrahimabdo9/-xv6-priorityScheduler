@@ -197,7 +197,7 @@ UPROGS=\
 	$U/_dorphan\
         $U/_ibrahim\
         $U/_program\
-        $U/_lab6\
+       
 
 
 ifeq ($(LAB),util)
