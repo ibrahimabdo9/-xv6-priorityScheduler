@@ -441,7 +441,7 @@ scheduler(void)
 
   if(p->state == RUNNABLE) {
 
-    if(best == 0 || p->priority > best->priority) {
+    if(best == 0 || p->priority < best->priority) {
 
       if(best != 0)
         release(&best->lock);
